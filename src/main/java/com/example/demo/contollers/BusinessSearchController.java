@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,10 +19,12 @@ public class BusinessSearchController {
 		
 		@GetMapping("/get-business-by-criteria")
 		public ResponseEntity<List<Business>> getBusinessesByCriteria(
-				@RequestParam(name = "term", required = false) String term,
-				@RequestParam(name = "longitude", required = false) String longitude,
-				@RequestParam(name = "latitude", required = false) String latitude){
-			return businessSearchService.getBusinessesByCriteria(term, latitude, longitude);
+				@RequestParam(name = "term", required = false, defaultValue = "") String term,
+				@RequestParam(name = "categories", required = false, defaultValue = "") String categories,
+				@RequestParam(name = "longitude", required = false, defaultValue = "") String longitude,
+				@RequestParam(name = "latitude", required = false, defaultValue = "") String latitude,
+				@RequestParam(name = "price", required = false, defaultValue = "") String price){
+			return businessSearchService.getBusinessesByCriteria(term, categories, latitude, longitude, price);
 
         }
 }

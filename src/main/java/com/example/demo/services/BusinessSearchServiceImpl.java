@@ -18,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -71,13 +73,23 @@ public class BusinessSearchServiceImpl implements BusinessSearchService {
 		}
 	}
 	
-	public ResponseEntity<List<Business>> getBusinessesByCriteria(String term, String latitude, String longitude) {
+	public ResponseEntity<List<Business>> getBusinessesByCriteria(String term, String categories, String latitude, String longitude, String price) {
 		try {
-			String url = "https://api.yelp.com/v3/businesses/search";				
-			UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
-					.queryParam("term", term)
-			        .queryParam("latitude", latitude)
-			        .queryParam("longitude", longitude);
+			String url = "https://api.yelp.com/v3/businesses/search";		
+
+			MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+			if(!term.isBlank())
+				params.add("term", term);
+			if(!categories.isBlank())
+				params.add("categories", categories);
+			if(!latitude.isBlank())
+				params.add("latitude", latitude);
+			if(!longitude.isBlank())
+				params.add("longitude", longitude);
+			if(!price.isBlank())
+				params.add("price", price);
+
+			UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url).queryParams(params);
 			
 			ResponseEntity<BusinessResponse> resultResponseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, getHttpEntity(), BusinessResponse.class);	
 			

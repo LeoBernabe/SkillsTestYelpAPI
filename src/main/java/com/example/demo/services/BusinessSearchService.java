@@ -9,6 +9,6 @@ import com.example.demo.models.Business;
 	
 public interface BusinessSearchService {
 	
-	public ResponseEntity<List<Business>> getBusinessesByCriteria(String term, String latitude, String longitude);
+	public ResponseEntity<List<Business>> getBusinessesByCriteria(String term, String categories, String latitude, String longitude, String price);
 	
 }
