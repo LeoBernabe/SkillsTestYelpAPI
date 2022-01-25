@@ -63,7 +63,7 @@ public class BusinessSearchServiceImpl implements BusinessSearchService {
 			ReviewResponse result =  resultResponseEntity.getBody();
 			List<Review> reviewList = result.getReviews();
 			for (Review review : reviewList) {			
-				review.setFaceDetectionResponse(getFaceDetection(review.getUser().getImage_url()));
+				// review.setFaceDetectionResponse(getFaceDetection(review.getUser().getImage_url()));
 			}
 			return reviewList;
 		}catch (final HttpClientErrorException e) {
