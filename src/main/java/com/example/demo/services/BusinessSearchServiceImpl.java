@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gcp.vision.CloudVisionTemplate;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -26,7 +27,6 @@ import com.example.demo.dto.FaceDetectionResponse;
 import com.example.demo.dto.ReviewResponse;
 import com.example.demo.models.Business;
 import com.example.demo.models.Review;
-import com.google.api.client.util.Value;
 import com.google.cloud.vision.v1.AnnotateImageResponse;
 import com.google.cloud.vision.v1.FaceAnnotation;
 import com.google.cloud.vision.v1.Feature;
@@ -71,15 +71,14 @@ public class BusinessSearchServiceImpl implements BusinessSearchService {
 		}
 	}
 	
-	public ResponseEntity<List<Business>> getBusinessesByCriteria(String location, String categories, String latitude, String longitude, String price) {
+	public ResponseEntity<List<Business>> getBusinessesByCriteria(String term, String latitude, String longitude) {
 		try {
 			String url = "https://api.yelp.com/v3/businesses/search";				
 			UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
-					.queryParam("location", location)
-			        .queryParam("categories", categories)
+					.queryParam("term", term)
 			        .queryParam("latitude", latitude)
-			        .queryParam("price", price)
 			        .queryParam("longitude", longitude);
+			
 			ResponseEntity<BusinessResponse> resultResponseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, getHttpEntity(), BusinessResponse.class);	
 			
 			BusinessResponse result = resultResponseEntity.getBody();
