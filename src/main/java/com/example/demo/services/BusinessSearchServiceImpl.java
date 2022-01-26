@@ -2,6 +2,7 @@ package com.example.demo.services;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -61,15 +62,14 @@ public class BusinessSearchServiceImpl implements BusinessSearchService {
 			String uri = "https://api.yelp.com/v3/businesses/" + businessId + "/reviews";		
 			ResponseEntity<ReviewResponse> resultResponseEntity = restTemplate.exchange(uri, HttpMethod.GET, getHttpEntity(), ReviewResponse.class);		
 			ReviewResponse result =  resultResponseEntity.getBody();
-			List<Review> reviewList = result.getReviews();
-			for (Review review : reviewList) {			
-				// review.setFaceDetectionResponse(getFaceDetection(review.getUser().getImage_url()));
-			}
+			List<Review> reviewList = result.getReviews().stream().map(review -> {
+				review.setFaceDetectionResponse(getFaceDetection(review.getUser().getImage_url()));
+				return review;
+			}).collect(Collectors.toList());
 			return reviewList;
 		}catch (final HttpClientErrorException e) {
-			e.printStackTrace();
-				log.info(e.getStatusCode().toString() + " " + e.getResponseBodyAsString());
-			    return null;  
+			log.info(e.getStatusCode().toString() + " " + e.getResponseBodyAsString());
+		    return null;  
 		}
 	}
 	
@@ -104,7 +104,6 @@ public class BusinessSearchServiceImpl implements BusinessSearchService {
 			
 			return new ResponseEntity<List<Business>>(businessList, HttpStatus.OK);
 		}catch (final HttpClientErrorException e) {
-			e.printStackTrace();
 		    log.info(e.getStatusCode().toString() + " " + e.getResponseBodyAsString());
 			return new ResponseEntity<List<Business>>(Collections.emptyList(), HttpStatus.BAD_REQUEST);
 		}
@@ -119,13 +118,16 @@ public class BusinessSearchServiceImpl implements BusinessSearchService {
 			AnnotateImageResponse response = this.cloudVisionTemplate.analyzeImage(imageResource,
 					Feature.Type.FACE_DETECTION);
 			
-			List<FaceAnnotation> faceAnnotationList = response.getFaceAnnotationsList();
-			for (FaceAnnotation fa : faceAnnotationList) {
-				faceDetectionResponse.setJoyLikelihood(fa.getJoyLikelihood().toString());
-				faceDetectionResponse.setSorrowLikelihood(fa.getSorrowLikelihood().toString());
-				faceDetectionResponse.setAngerLikelihood(fa.getAngerLikelihood().toString());
-				faceDetectionResponse.setSurpriseLikelihood(fa.getSurpriseLikelihood().toString());
+			
+			// get the first face detection in the data
+			Optional<FaceAnnotation> faceAnnotation = response.getFaceAnnotationsList().stream().findFirst();
+			if(faceAnnotation.isPresent()) {
+				faceDetectionResponse.setJoyLikelihood(faceAnnotation.get().getJoyLikelihood().toString());
+				faceDetectionResponse.setSorrowLikelihood(faceAnnotation.get().getSorrowLikelihood().toString());
+				faceDetectionResponse.setAngerLikelihood(faceAnnotation.get().getAngerLikelihood().toString());
+				faceDetectionResponse.setSurpriseLikelihood(faceAnnotation.get().getSurpriseLikelihood().toString());
 			}
+			
 			return faceDetectionResponse;
 		}
 		return new FaceDetectionResponse();
