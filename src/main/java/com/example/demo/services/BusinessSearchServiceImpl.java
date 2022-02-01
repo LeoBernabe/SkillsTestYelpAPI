@@ -1,6 +1,5 @@
 package com.example.demo.services;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -73,11 +72,11 @@ public class BusinessSearchServiceImpl implements BusinessSearchService {
 		}
 	}
 	
-	public ResponseEntity<List<Business>> getBusinessesByCriteria(String term, String categories, String latitude, String longitude, String price) {
+	public ResponseEntity<BusinessResponse> getBusinessesByCriteria(String term, String categories, String latitude, String longitude, String price, String location, String limit, String radius) {
 		try {
 			String url = "https://api.yelp.com/v3/businesses/search";		
 
-			MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+			MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();;
 			if(!term.isBlank())
 				params.add("term", term);
 			if(!categories.isBlank())
@@ -88,6 +87,12 @@ public class BusinessSearchServiceImpl implements BusinessSearchService {
 				params.add("longitude", longitude);
 			if(!price.isBlank())
 				params.add("price", price);
+			if(!location.isBlank())
+				params.add("location", location);
+			if(!limit.isBlank())
+				params.add("limit", limit);
+			if(!radius.isBlank())
+				params.add("radius", radius);
 
 			UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url).queryParams(params);
 			
@@ -97,15 +102,14 @@ public class BusinessSearchServiceImpl implements BusinessSearchService {
 			List<Business> businessList = result.getBusinesses().stream().map(business -> {
 				List<Review> reviews = getBusinessReviewsById(business.getId());
 				business.setReviews(reviews);
-				business.setId(business.getId());
-				business.setName(business.getName());
 				return business;
 			}).collect(Collectors.toList());	
+			result.setBusinesses(businessList);
 			
-			return new ResponseEntity<List<Business>>(businessList, HttpStatus.OK);
+			return new ResponseEntity<BusinessResponse>(result, HttpStatus.OK);
 		}catch (final HttpClientErrorException e) {
 		    log.info(e.getStatusCode().toString() + " " + e.getResponseBodyAsString());
-			return new ResponseEntity<List<Business>>(Collections.emptyList(), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<BusinessResponse>(new BusinessResponse(), HttpStatus.BAD_REQUEST);
 		}
 	}
     

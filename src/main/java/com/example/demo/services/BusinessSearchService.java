@@ -1,14 +1,13 @@
 
 package com.example.demo.services;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 
-import com.example.demo.models.Business;
+import com.example.demo.dto.BusinessResponse;
 	
 public interface BusinessSearchService {
 	
-	public ResponseEntity<List<Business>> getBusinessesByCriteria(String term, String categories, String latitude, String longitude, String price);
+	public ResponseEntity<BusinessResponse> getBusinessesByCriteria(
+			String term, String categories, String latitude, String longitude, String price, String location, String limit, String radius);
 	
 }
